@@ -1,7 +1,8 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    "jsx": "react-jsx", // Your existing settings
+    "strict": true, // This is good practice but optional
+    "forceConsistentCasingInFileNames": true // Add this option
+  },
+  "include": ["src"]
 }
