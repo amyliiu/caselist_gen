@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/caselist_gen/src/main.tsx",
+            "program": "${workspaceFolder}/caselist_gen/src/caselist-generator.tsx",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]

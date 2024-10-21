@@ -1,5 +1,5 @@
 // src/App.tsx
-import { CaselistGeneratorComponent } from './caselist-generator';
+import { CaselistGeneratorComponent } from './caselist-generator-fade';
 
 function App() {
   return (
