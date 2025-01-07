@@ -6,7 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "esModuleInterop": true
   },
-  "include": ["src"]
+  "include": ["src", "client/src/components/App.tsx", "client/components", "client/lib", "client/vite-env.d.ts"]
 }

@@ -1,17 +1,20 @@
 'use client'
 
+import React from 'react'
 import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Label } from "../components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table"
 import { DownloadIcon, UploadIcon } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
 export function CaselistGeneratorComponent() {
   const [file, setFile] = useState<File | null>(null)
   const [processedData, setProcessedData] = useState<any[]>([])
+  const [displayedData, setDisplayedData] = useState<any[]>([]) // For gradual display
+  const [isProcessing, setIsProcessing] = useState(false) // Processing state
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -19,61 +22,52 @@ export function CaselistGeneratorComponent() {
       setFile(file)
     }
   }
+
   const processFile = () => {
-    if (!file) return
-  
+    if (!file) return;
+
+    setIsProcessing(true); // Set processing state to true
+
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const data = new Uint8Array(e.target?.result as ArrayBuffer)
       const workbook = XLSX.read(data, { type: 'array' })
       const sheetName = workbook.SheetNames[0]
       const worksheet = workbook.Sheets[sheetName]
       const json = XLSX.utils.sheet_to_json(worksheet)
-  
-      // Initialize arrays for each column
-      const schools: any[] = []
-      const locations: any[] = []
+
       const teams: any[] = []
-      const codes: any[] = []
-  
+      
       // Process each row of the sheet
       json.forEach((row: any) => {
-        // Push values into corresponding arrays
-        schools.push(row['school'])
-        locations.push(row['location'])
-        teams.push(row['team'])
-        codes.push(row['code'])
+        teams.push({ team: row['team'], school: row['school'] }); // Push team and school
       })
+
+      setProcessedData(teams)
+
+      // Call the scraping function and process 1ACs for each team
+      const { scrapeTeams } = require('./scrape.js');
+
+      try {
+        const scrapedData = await scrapeTeams(teams); // Pass teams to scraping function
+        displayTeamsGradually(scrapedData);
+      } catch (err: any) {
+        console.error('Scraping error:', err.message, err.stack);
+      } finally {
+        setIsProcessing(false); // Processing is done
+      }
     }
-    reader.readAsArrayBuffer(file)
 
-    const { scrapeTeams } = require('./scrape.js');
-
-// Call the scrape function
-    scrapeTeams()
-    .then(() => console.log('Scraping complete'))
-    .catch((err:Error) => console.error('Scraping error:', err));
-
-  }
-  
-  
-
-  const generateMockCases = (type: 'aff' | 'neg') => {
-    const affCases = [
-      "Climate Change Mitigation",
-      "Universal Basic Income",
-      "Renewable Energy Transition",
-      "Education Reform"
-    ]
-    const negCases = [
-      "Economic Impact Disadvantage",
-      "Federalism Counterplan",
-      "Spending Tradeoff Kritik",
-      "States Counterplan"
-    ]
-    return type === 'aff' ? affCases.join(', ') : negCases.join(', ')
+    reader.readAsArrayBuffer(file);
   }
 
+  // Function to display teams and 1ACs gradually
+  const displayTeamsGradually = async (teams: any[]) => {
+    for (let i = 0; i < teams.length; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Delay of 1 second
+      setDisplayedData((prev) => [...prev, teams[i]]);
+    }
+  }
 
   const downloadProcessedFile = () => {
     const worksheet = XLSX.utils.json_to_sheet(processedData)
@@ -100,13 +94,13 @@ export function CaselistGeneratorComponent() {
                 onChange={handleFileUpload}
               />
             </div>
-            <Button onClick={processFile} disabled={!file}>
+            <Button onClick={processFile} disabled={!file || isProcessing}>
               <UploadIcon className="mr-2 h-4 w-4" />
-              Process Spreadsheet
+              {isProcessing ? "Processing..." : "Process Spreadsheet"}
             </Button>
           </div>
 
-          {processedData.length > 0 && (
+          {displayedData.length > 0 && (
             <div className="mt-8">
               <h3 className="text-lg font-semibold mb-4">Processed Data Preview</h3>
               <div className="overflow-x-auto">
@@ -115,27 +109,19 @@ export function CaselistGeneratorComponent() {
                     <TableRow>
                       <TableHead>Team Name</TableHead>
                       <TableHead>School</TableHead>
-                      <TableHead>Affirmative Cases</TableHead>
-                      <TableHead>Negative Cases</TableHead>
+                      <TableHead>1AC</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {processedData.slice(0, 5).map((row, index) => (
+                    {displayedData.map((row, index) => (
                       <TableRow key={index}>
-                        <TableCell>{row['Team Name']}</TableCell>
-                        <TableCell>{row['School']}</TableCell>
-                        <TableCell>{row.affCases}</TableCell>
-                        <TableCell>{row.negCases}</TableCell>
+                        <TableCell>{row.team}</TableCell>
+                        <TableCell>{row.school}</TableCell>
+                        <TableCell>{row.oneAC}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-              <div className="mt-4">
-                <Button onClick={downloadProcessedFile}>
-                  <DownloadIcon className="mr-2 h-4 w-4" />
-                  Download Processed Spreadsheet
-                </Button>
               </div>
             </div>
           )}
