@@ -132,4 +132,6 @@ dist
 node_modules/
 dist/
 .env
+repomix-output.txt
+
 
