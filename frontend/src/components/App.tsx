@@ -7,15 +7,14 @@ const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [file, setFile] = useState<File | null>(null); // State to hold the uploaded file
 
-  // Handler for successful login
   const handleLogin = (data: any) => {
     console.log('Logged in successfully:', data);
     setIsLoggedIn(true);
   };
 
-  // Handler for file upload
   const handleFileUpload = (uploadedFile: File) => {
-    setFile(uploadedFile); // Store the uploaded file in state
+    console.log('File uploaded:', uploadedFile);
+    setFile(uploadedFile); 
   };
 
   return (
@@ -23,7 +22,7 @@ const App: React.FC = () => {
       {!isLoggedIn ? (
         <LoginForm onLogin={handleLogin} /> // Show LoginForm if not logged in
       ) : (
-        <CaselistGeneratorComponent onFileUpload={handleFileUpload} /> // Pass file upload handler
+        <CaselistGeneratorComponent onFileUpload={handleFileUpload} />
       )}
     </div>
   );

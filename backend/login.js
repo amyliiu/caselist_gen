@@ -2,14 +2,12 @@
 const puppeteer = require('puppeteer');
 
 const login = async (username, password) => {
-  console.log('Logging in with username:', username, 'and password:', password);
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   // Navigate to the OpenCaselist login page
   await page.goto('https://opencaselist.com');
 
-  // Enter the username and password
   await page.type('input[name="username"]', username);
   await page.type('input[name="password"]', password);
   await page.click('button[type="submit"]'); 
@@ -21,13 +19,6 @@ const login = async (username, password) => {
     return successElement !== null; 
   });
 
-  if (loginSuccess) {
-    console.log('Login successful!');
-  } else {
-    console.log('Login failed.');
-  }
-
-  await browser.close();
   return loginSuccess;
 };
 
