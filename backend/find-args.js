@@ -9,17 +9,17 @@ function findArgs(filePath) {
       }
 
       const results = Papa.parse(data, { header: false });
+      const codeArray = [];
       const schoolArray = [];
-      const teamArray = [];
-
       for (let i = 1; i < results.data.length; i++) {
         const row = results.data[i];
-        if (row.length > 3) { // Ensure there are enough columns
-          schoolArray.push(row[0]); // 1st element
-          teamArray.push(row[2]); // 3rd element
+        if (row.length > 3) {
+          codeArray.push(row[3]); 
+          schoolArray.push(row[0]);
         }
       }
-      resolve({ schools: schoolArray, teams: teamArray });
+
+      resolve({ codes: codeArray, schools: schoolArray });
     });
   });
 }

@@ -1,20 +1,19 @@
 // backend/server.js
 require('dotenv').config();
 const express = require('express');
-// const bodyParser = require('body-parser');
 const cors = require('cors');
 const multer = require('multer'); 
 const login = require('./login');
 const findArgs = require('./find-args');
+const { scrapeData } = require('./scraper');
+const XLSX = require('xlsx');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// app.use(cors());
-// app.use(bodyParser.json());
+
 app.use(cors());
-app.use(express.json()); // Add this line to parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Optional: to parse URL-encoded bodies
+app.use(express.json()); 
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -46,11 +45,40 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   const filePath = req.file.path;
 
   try {
-    const { schools, teams } = await findArgs(filePath)
-      console.log('Schools and teams generated successfully');
-      res.json({message: 'Schools and teams generated successfully'});
+    const { codes, schools } = await findArgs(filePath);
+    // console.log('Team codes and schools generated successfully');
+
+    const scrapedData = [];
+    //TODO: change length
+    for(let i = 0; i < 2; i++) {
+      const team = codes[i];
+      const school = schools[i];
+      console.log('Scraping data for team:', team);
+
+      const data = await scrapeData(team, school);
+      if(data) {
+        scrapedData.push(data);
+        console.log('Scraped data:', data);
+      }
+      else{
+        console.log('Error scraping data for team:', team);
+      }
+    }
+
+    console.log('Scraped data:', scrapedData);
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(scrapedData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Scraped Data');
+    XLSX.writeFile(workbook, 'output.xlsx');
+
+    const outputPath = path.join(__dirname, 'caselist.xlsx');
+    XLSX.writeFile(workbook, outputPath);
+
+    console.log('Scraped data saved to:', outputPath);
+    res.download(outputPath);
+    
   } catch (error) {
-      console.log('Error generating schools and teams');
+      console.log('Error generating team codes: ', error);
       res.status(500).json({ error: error.message });
   }
 });

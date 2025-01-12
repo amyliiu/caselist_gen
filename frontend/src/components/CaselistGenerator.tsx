@@ -11,8 +11,7 @@ interface CaselistGeneratorProps {
 }
 
 export function CaselistGeneratorComponent({ onFileUpload }: CaselistGeneratorProps) {
-  const [schools, setSchools] = useState([])
-  const [teams, setTeams] = useState([])
+  const [codes, setCodes] = useState([])
   const [file, setFile] = useState<File | null>(null)
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,8 +43,7 @@ export function CaselistGeneratorComponent({ onFileUpload }: CaselistGeneratorPr
 
       const data = await response.json();
       console.log('Processed data:', data);
-      setSchools(data.schools);
-      setTeams(data.teams);
+      setCodes(data.codes);
     } catch (error) {
       console.error('Error uploading file:', error);
     }
