@@ -66,60 +66,21 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       }
     }
 
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(scrapedData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Scraped Data');
-    XLSX.writeFile(workbook, 'output.xlsx');
+    // const workbook = XLSX.utils.book_new();
+    // const worksheet = XLSX.utils.json_to_sheet(scrapedData);
+    // XLSX.utils.book_append_sheet(workbook, worksheet, 'Scraped Data');
 
-    const outputPath = path.join(__dirname, 'caselist.xlsx');
-    XLSX.writeFile(workbook, outputPath);
+    // const outputPath = path.join(__dirname, 'caselist.xlsx');
+    // XLSX.writeFile(workbook, outputPath);
 
-    console.log('Scraped data saved to:', outputPath);
+    // console.log('Scraped data saved to:', outputPath);
     
-    // Send a response with the URL to download the file
-    res.json({ downloadUrl: `/download/caselist.xlsx` });
+    res.json({ data: scrapedData });
     
   } catch (error) {
       console.log('Error generating team codes: ', error);
       res.status(500).json({ error: error.message });
   }
-});
-
-// Serve the file for download
-app.get('/download/:filename', (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(__dirname, filename);
-  res.download(filePath, (err) => {
-    if (err) {
-      console.error('Error downloading file:', err);
-      res.status(500).send('Error downloading file');
-    }
-  });
-});
-
-// Serve a simple HTML page with a download link
-app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <body>
-        <h1>Download Scraped Data</h1>
-        <button onclick="generateData()">Generate Data</button>
-        <div id="downloadLink" style="display:none;">
-          <a id="link" href="#" download>Download Excel File</a>
-        </div>
-        <script>
-          async function generateData() {
-            const response = await fetch('/generate');
-            const data = await response.json();
-            const link = document.getElementById('link');
-            link.href = data.downloadUrl;
-            link.innerText = 'Download caselist.xlsx';
-            document.getElementById('downloadLink').style.display = 'block';
-          }
-        </script>
-      </body>
-    </html>
-  `);
 });
 
 app.listen(PORT, () => {
