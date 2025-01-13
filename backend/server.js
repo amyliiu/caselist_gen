@@ -7,6 +7,7 @@ const login = require('./login');
 const findArgs = require('./find-args');
 const { scrapeData } = require('./scraper');
 const XLSX = require('xlsx');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -45,13 +46,13 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   const filePath = req.file.path;
 
   try {
-    const { codes, schools } = await findArgs(filePath);
+    const { schools, teams } = await findArgs(filePath);
     // console.log('Team codes and schools generated successfully');
 
     const scrapedData = [];
     //TODO: change length
     for(let i = 0; i < 2; i++) {
-      const team = codes[i];
+      const team = teams[i]
       const school = schools[i];
       console.log('Scraping data for team:', team);
 
@@ -65,7 +66,6 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       }
     }
 
-    console.log('Scraped data:', scrapedData);
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(scrapedData);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Scraped Data');
