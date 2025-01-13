@@ -1,10 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 interface CaselistGeneratorProps {
   onFileUpload: (uploadedFile: File) => void;
@@ -49,29 +45,4 @@ export function CaselistGeneratorComponent({ onFileUpload }: CaselistGeneratorPr
     }
   };
 
-
-  return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Caselist Generator</CardTitle>
-          <CardDescription>Upload a spreadsheet of competing teams and schools from a Tabroom Tournament to generate a caselist</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="file-upload">Upload Spreadsheet</Label>
-              <Input
-                id="file-upload"
-                type="file"
-                accept=".csv, .xlsx, .xls"
-                onChange={handleFileChange}
-              />
-            </div>
-            <Button onClick={handleProcessSpreadsheet}>Process Spreadsheet</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
 }
