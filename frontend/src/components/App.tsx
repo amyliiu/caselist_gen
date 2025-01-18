@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import '../styles/globals.css';
-import * as XLSX from 'xlsx';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import PreviewPage from './PreviewPage'; // Import the PreviewPage component
+import Layout from './Layout'; // Import the Layout component
 
 const App: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -9,6 +11,8 @@ const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [data, setData] = useState<any[]>([]);
   const [fileName, setFileName] = useState('');
+
+  const navigate = useNavigate(); // Use navigate for routing
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,6 +38,7 @@ const App: React.FC = () => {
     else{
       console.log('Logged in successfully:', data);
       handleProcessSpreadsheet(file);
+      navigate('/preview'); // Redirect to the preview page
     }
   };
 
@@ -57,62 +62,61 @@ const App: React.FC = () => {
       throw new Error('Network response was not ok');
     }
 
-    const data = await response.json();
-    console.log('Processed data:', data);
-    setData(data.codes);
+    const result = await response.json();
+    setData(result.codes);
     setFileName(file.name);
+    navigate('/preview');
+
     } catch (error) {
       console.error('Error uploading file:', error);
     }
   }
 
-  const downloadFile = () => {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-    XLSX.writeFile(wb, 'caselist.xlsx');
-  };
-
   return (
-      <div className="container">
-        <h1>AutoCase</h1>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="username"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="file">Upload File</label>
-            <input
-              type="file"
-              id="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              required
-            />
-          </div>
-          <button type="submit">Submit</button>
-        </form>
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-      </div>
-  );
+    <Routes>
+        <Route path="/" element={<Layout />}>
+            <Route path="/" element={
+                <div className="container">
+                    <h1>AutoCase</h1>
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="username">Username</label>
+                            <input
+                                type="username"
+                                id="username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="file">Upload File</label>
+                            <input
+                                type="file"
+                                id="file"
+                                onChange={(e) => handleProcessSpreadsheet(e.target.files[0])}
+                                required
+                            />
+                        </div>
+                        <button type="submit">Submit</button>
+                    </form>
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
+                </div>
+            } />
+            <Route path="/preview" element={<PreviewPage data={data} />} />
+        </Route>
+    </Routes>
+);
 };
 
 export default App;
-
-

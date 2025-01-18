@@ -1,13 +1,13 @@
 import React from 'react';
 
 interface PreviewPageProps {
-    data: any[];
+    data: any[]; // Expecting data to be passed as a prop
     fileName: string;
 }
 
 const PreviewPage: React.FC<PreviewPageProps> = ({ data, fileName }) => {
     return (
-        <div className="container">
+        <div>
             <h1>Preview of {fileName}</h1>
             {data.length > 0 ? (
                 <table>
