@@ -22,7 +22,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ data, fileName }) => {
                         {data.map((row, index) => (
                             <tr key={index}>
                                 {Object.values(row).map((value, i) => (
-                                    <td key={i}>{value}</td>
+                                    <td key={i}>{String(value)}</td>
                                 ))}
                             </tr>
                         ))}

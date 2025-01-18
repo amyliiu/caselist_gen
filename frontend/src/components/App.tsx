@@ -104,7 +104,12 @@ const App: React.FC = () => {
                             <input
                                 type="file"
                                 id="file"
-                                onChange={(e) => handleProcessSpreadsheet(e.target.files[0])}
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        handleProcessSpreadsheet(file);
+                                    }
+                                }}
                                 required
                             />
                         </div>
@@ -113,7 +118,7 @@ const App: React.FC = () => {
                     {errorMessage && <p className="error-message">{errorMessage}</p>}
                 </div>
             } />
-            <Route path="/preview" element={<PreviewPage data={data} />} />
+            <Route path="/preview" element={<PreviewPage data={data} fileName={fileName} />} />
         </Route>
     </Routes>
 );
